@@ -1,16 +1,19 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-class AudioPlayerInterfaceDart {
-  static AudioPlayerInterfaceDart? _instance;
+class MediaPlayerInterface {
+  static MediaPlayerInterface? _instance;
   // Avoid self instance
-  AudioPlayerInterfaceDart._();
-  static AudioPlayerInterfaceDart get instance =>
-      _instance ??= AudioPlayerInterfaceDart._();
+  MediaPlayerInterface._();
+  static MediaPlayerInterface get instance =>
+      _instance ??= MediaPlayerInterface._();
 
   static const platform = MethodChannel('com.example.native_player/exoplayer');
 
+  // duration of the audio
+  final ValueNotifier<Object?> duration = ValueNotifier(null);
   // Method to initialize the audio player
   Future<void> initialize() async {
     try {
@@ -23,9 +26,13 @@ class AudioPlayerInterfaceDart {
   // Method to play audio from a URL
   Future<void> play(String url) async {
     try {
-      await platform.invokeMethod('play', {'url': url});
+      final duration = await platform.invokeMethod('play', {'url': url});
+      if (duration != null) {
+        this.duration.value = duration;
+      }
     } on PlatformException catch (e) {
       log("Failed to play audio: '${e.message}'.");
+      throw Exception("Failed to play audio: '${e.message}'.");
     }
   }
 

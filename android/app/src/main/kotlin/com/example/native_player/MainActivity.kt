@@ -34,6 +34,11 @@ class MainActivity : FlutterActivity() {
         exoPlayer = ExoPlayer.Builder(this).build()
     }
 
+    // get duration of the media
+    private fun getDuration(): Long {
+        return exoPlayer?.duration ?: 0L
+    }
+
     // Override the configureFlutterEngine method to set up the method channel
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -56,13 +61,18 @@ class MainActivity : FlutterActivity() {
                     // result.success(null)
                     // Check if the URL is provided
                     val url = call.argument<String>("url")
+                    // log the URL for debugging
+                    println("Playing audio from URL: $url")
                     if (url != null) {
                         // Prepare the media source and play
+//                        Uri uri = Uri.parse(url)
                         val mediaItem = MediaItem.fromUri(url)
                         exoPlayer?.setMediaItem(mediaItem)
                         exoPlayer?.prepare()
                         exoPlayer?.play()
-                        result.success(null)
+                        // Return the duration of the media
+                        val duration = getDuration()
+                        result.success(duration)
                     } else {
                         result.error("INVALID_ARGUMENT", "URL is required", null)
                         return@setMethodCallHandler
